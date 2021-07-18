@@ -16,7 +16,7 @@ namespace DBCD
         private int ID;
 
         private readonly dynamic raw;
-        private readonly FieldAccessor fieldAccessor;
+        private FieldAccessor fieldAccessor;
 
         internal DBCDRow(int ID, dynamic raw, FieldAccessor fieldAccessor)
         {
@@ -30,14 +30,21 @@ namespace DBCD
             return fieldAccessor.TryGetMember(this.raw, binder.Name, out result);
         }
 
+        public override bool TrySetMember(SetMemberBinder binder, object value)
+        {
+            return fieldAccessor.TrySetMember(this.raw, binder.Name, value);
+        }
+
         public object this[string fieldName]
         {
             get => fieldAccessor[this.raw, fieldName];
+            set => fieldAccessor[this.raw, fieldName] = value;
         }
 
         public object this[string fieldName, int index]
         {
             get => ((Array)this[fieldName]).GetValue(index);
+            set => ((Array)this[fieldName]).SetValue(value, index);
         }
 
         public T Field<T>(string fieldName)
@@ -70,9 +77,37 @@ namespace DBCD
         }
     }
 
+    public class RowConstructor
+    {
+        private readonly IDBCDStorage storage;
+        public RowConstructor(IDBCDStorage storage)
+        {
+            this.storage = storage;
+        }
+
+        public bool Create(int index, Action<dynamic> f)
+        {
+            var constructedRow = storage.ConstructRow(index);
+            if (storage.ContainsKey(index))
+                return false;
+            else
+            {
+                f(constructedRow);
+                storage.Add(index, constructedRow);
+            }
+
+            return true;
+        }
+    }
+
     public interface IDBCDStorage : IEnumerable<DynamicKeyValuePair<int>>, IDictionary<int, DBCDRow>
     {
         string[] AvailableColumns { get; }
+
+        DBCDRow ConstructRow(int index);
+
+        void ApplyingHotfixes(HotfixReader hotfixReader);
+        void ApplyingHotfixes(HotfixReader hotfixReader, HotfixReader.RowProcessor processor);
 
         Dictionary<ulong, int> GetEncryptedSections();
         void Save(string filename);
@@ -83,20 +118,20 @@ namespace DBCD
         private readonly FieldAccessor fieldAccessor;
         private readonly Storage<T> storage;
         private readonly DBCDInfo info;
-        private readonly DBParser reader;
+        private readonly DBParser parser;
 
         string[] IDBCDStorage.AvailableColumns => this.info.availableColumns;
         public override string ToString() => $"{this.info.tableName}";
 
         public DBCDStorage(Stream stream, DBCDInfo info) : this(new DBParser(stream), info) { }
 
-        public DBCDStorage(DBParser dbReader, DBCDInfo info) : this(dbReader, dbReader.GetRecords<T>(), info) { }
+        public DBCDStorage(DBParser dbParser, DBCDInfo info) : this(dbParser, dbParser.GetRecords<T>(), info) { }
 
-        public DBCDStorage(DBParser reader, Storage<T> storage, DBCDInfo info) : base(new Dictionary<int, DBCDRow>())
+        public DBCDStorage(DBParser parser, Storage<T> storage, DBCDInfo info) : base(new Dictionary<int, DBCDRow>())
         {
             this.info = info;
             this.fieldAccessor = new FieldAccessor(typeof(T), info.availableColumns);
-            this.reader = reader;
+            this.parser = parser;
             this.storage = storage;
 
             foreach (var record in storage)
@@ -112,7 +147,24 @@ namespace DBCD
                 yield return new DynamicKeyValuePair<int>(enumerator.Current.Key, enumerator.Current.Value);
         }
         
-        public Dictionary<ulong, int> GetEncryptedSections() => this.reader.GetEncryptedSections();
+        public Dictionary<ulong, int> GetEncryptedSections() => this.parser.GetEncryptedSections();
+
+
+        public void ApplyingHotfixes(HotfixReader hotfixReader)
+        {
+            this.ApplyingHotfixes(hotfixReader, null);
+        }
+
+        public void ApplyingHotfixes(HotfixReader hotfixReader, HotfixReader.RowProcessor processor)
+        {
+            var mutableStorage = this.storage.ToDictionary(k => k.Key, v => v.Value);
+
+            hotfixReader.ApplyHotfixes(mutableStorage, this.parser, processor);
+
+            foreach (var (id, row) in mutableStorage)
+                base[id] = new DBCDRow(id, row, fieldAccessor);
+        }
+
 
         public void Save(string filename)
         {
@@ -121,5 +173,7 @@ namespace DBCD
 
             storage?.Save(filename);
         }
+
+        public DBCDRow ConstructRow(int index) => new DBCDRow(index, new T(), fieldAccessor);
     }
 }
