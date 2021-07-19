@@ -30,7 +30,7 @@ namespace DBCD.Tests
             var hotfix = new HotfixReader("hotfix.bin");
 
             var countBefore = storage.Count;
-            storage = storage.ApplyingHotfixes(hotfix);
+            storage.ApplyingHotfixes(hotfix);
 
             var countAfter = storage.Count;
 
