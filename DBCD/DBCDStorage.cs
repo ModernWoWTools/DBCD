@@ -63,6 +63,8 @@ namespace DBCD
         }
 
         public T AsType<T>() => (T)raw;
+
+        public Type GetUnderlyingType() => raw.GetType();
     }
 
     public class DynamicKeyValuePair<T>
@@ -149,7 +151,6 @@ namespace DBCD
         
         public Dictionary<ulong, int> GetEncryptedSections() => this.parser.GetEncryptedSections();
 
-
         public void ApplyingHotfixes(HotfixReader hotfixReader)
         {
             this.ApplyingHotfixes(hotfixReader, null);
@@ -164,7 +165,6 @@ namespace DBCD
             foreach (var (id, row) in mutableStorage)
                 base[id] = new DBCDRow(id, row, fieldAccessor);
         }
-
 
         public void Save(string filename)
         {
