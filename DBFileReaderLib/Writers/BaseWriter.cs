@@ -161,22 +161,30 @@ namespace DBFileReaderLib.Writers
                 {
                     case CompressionType.SignedImmediate:
                         {
-                            var maxValue = storage.Values.AsParallel().Max(row =>
+                            var maxValue = storage.Values.Count switch
                             {
-                                var value32 = Value32.Create(info.Getter(row));
-                                return value32.GetValue<int>();
-                            });
+                                0 => 0,
+                                _ => storage.Values.AsParallel().Max(row =>
+                                {
+                                    var value32 = Value32.Create(info.Getter(row));
+                                    return value32.GetValue<int>();
+                                }),
+                            };
 
                             newCompressedSize = maxValue.MostSignificantBit() + 1;
                             break;
                         }
                     case CompressionType.Immediate:
                         {
-                            var maxValue = storage.Values.AsParallel().Max(row =>
+                            var maxValue = storage.Values.Count switch
                             {
-                                var value32 = Value32.Create(info.Getter(row));
-                                return value32.GetValue<uint>();
-                            });
+                                0 => 0U,
+                                _ => storage.Values.AsParallel().Max(row =>
+                                {
+                                    var value32 = Value32.Create(info.Getter(row));
+                                    return value32.GetValue<uint>();
+                                }),
+                            };
 
                             newCompressedSize = maxValue.MostSignificantBit();
                             break;
@@ -185,7 +193,6 @@ namespace DBFileReaderLib.Writers
                         {
                             Parallel.ForEach(storage.Values, row => palletData.Add(new[] { Value32.Create(info.Getter(row)) }));
                             var fieldMaxSize = palletData.AsParallel().Distinct(valueComparer).Count();
-
                             newCompressedSize = fieldMaxSize.MostSignificantBit();
                             break;
                         }
@@ -201,7 +208,6 @@ namespace DBFileReaderLib.Writers
                             });
 
                             var fieldMaxSize = palletData.AsParallel().Distinct(valueComparer).Count();
-
                             newCompressedSize = fieldMaxSize.MostSignificantBit();
                             break;
                         }

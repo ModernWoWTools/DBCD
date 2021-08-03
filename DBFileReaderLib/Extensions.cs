@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -105,6 +107,16 @@ namespace DBFileReaderLib
         public static bool HasFlagExt(this DB2Flags flag, DB2Flags valueToCheck)
         {
             return (flag & valueToCheck) == valueToCheck;
+        }
+
+        public static T MaxOrDefault<T>(this ICollection<T> source)
+        {
+            return source.DefaultIfEmpty().Max();
+        }
+
+        public static T MinOrDefault<T>(this ICollection<T> source)
+        {
+            return source.DefaultIfEmpty().Min();
         }
     }
 

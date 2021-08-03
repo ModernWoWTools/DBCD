@@ -297,8 +297,8 @@ namespace DBFileReaderLib.Writers
 
             using (var writer = new BinaryWriter(stream))
             {
-                int minIndex = storage.Keys.Min();
-                int maxIndex = storage.Keys.Max();
+                int minIndex = storage.Keys.MinOrDefault();
+                int maxIndex = storage.Keys.MaxOrDefault();
                 int copyTableSize = Flags.HasFlagExt(DB2Flags.Sparse) ? 0 : CopyData.Count * 8;
 
                 writer.Write(reader.Signature);

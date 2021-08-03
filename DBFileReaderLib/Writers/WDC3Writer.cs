@@ -303,8 +303,8 @@ namespace DBFileReaderLib.Writers
 
             using (var writer = new BinaryWriter(stream))
             {
-                int minIndex = storage.Keys.Min();
-                int maxIndex = storage.Keys.Max();
+                int minIndex = storage.Keys.MinOrDefault();
+                int maxIndex = storage.Keys.MaxOrDefault();
 
                 writer.Write(WDC3FmtSig);
                 writer.Write(RecordsCount);

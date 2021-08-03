@@ -165,7 +165,7 @@ namespace DBCD
             foreach (var (id, row) in mutableStorage)
                 base[id] = new DBCDRow(id, row, fieldAccessor);
 
-            foreach (var key in base.Keys.Except(mutableStorage.Keys))
+            foreach (var key in mutableStorage.Keys.Except(base.Keys))
                 base.Remove(key);
         }
 
