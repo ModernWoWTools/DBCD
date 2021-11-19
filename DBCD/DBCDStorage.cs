@@ -171,7 +171,7 @@ namespace DBCD
 
         public void Save(string filename)
         {
-            foreach (var (id, record) in this)
+            foreach (var (id, record) in new SortedDictionary<int, DBCDRow>(this))
                 storage.Add(id, record.AsType<T>());
 
             storage?.Save(filename);
