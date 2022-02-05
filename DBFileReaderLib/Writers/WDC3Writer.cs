@@ -291,11 +291,12 @@ namespace DBFileReaderLib.Writers
 
             WDC3RowSerializer<T> serializer = new WDC3RowSerializer<T>(this);
             serializer.Serialize(storage);
-            serializer.UpdateStringOffsets(storage);
 
             // We write the copy rows if and only if it saves space and the table hasn't any reference rows.
             if ((RecordSize) >= sizeof(int) * 2 && ReferenceData.Count == 0)
                 serializer.GetCopyRows();
+
+            serializer.UpdateStringOffsets(storage);
 
             RecordsCount = serializer.Records.Count - CopyData.Count;
 
