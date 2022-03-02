@@ -150,7 +150,7 @@ namespace DBFileReaderLib.Writers
                 var newCompressedSize = compressionSize;
 
                 var palletData = new ConcurrentBag<Value32[]>();
-
+                
                 if (!externalCompressions.Contains(compressionType))
                 {
                     if (PackedDataOffset == -1)
@@ -160,20 +160,6 @@ namespace DBFileReaderLib.Writers
                 switch (compressionType)
                 {
                     case CompressionType.SignedImmediate:
-                        {
-                            var maxValue = storage.Values.Count switch
-                            {
-                                0 => 0,
-                                _ => storage.Values.AsParallel().Max(row =>
-                                {
-                                    var value32 = Value32.Create(info.Getter(row));
-                                    return value32.GetValue<int>();
-                                }),
-                            };
-
-                            newCompressedSize = maxValue.MostSignificantBit() + 1;
-                            break;
-                        }
                     case CompressionType.Immediate:
                         {
                             var maxValue = storage.Values.Count switch
@@ -186,7 +172,7 @@ namespace DBFileReaderLib.Writers
                                 }),
                             };
 
-                            newCompressedSize = maxValue.MostSignificantBit();
+                            newCompressedSize = compressionType == CompressionType.SignedImmediate ? maxValue.MostSignificantBit() + 1 : maxValue.MostSignificantBit();
                             break;
                         }
                     case CompressionType.Pallet:

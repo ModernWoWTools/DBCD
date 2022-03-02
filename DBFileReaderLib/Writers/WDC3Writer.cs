@@ -123,7 +123,6 @@ namespace DBFileReaderLib.Writers
 
             int recordOffset = (Records.Count - m_writer.CopyData.Count) * m_writer.RecordSize;
             int fieldOffset = 0;
-
             foreach (var record in Records)
             {
                 // skip copy records
@@ -148,7 +147,7 @@ namespace DBFileReaderLib.Writers
                         var array = (string[])info.Getter(rows[record.Key]);
                         for (int i = 0; i < array.Length; i++)
                         {
-                            fieldOffset = m_writer.StringTable[array[i]] + recordOffset - (columnMeta.RecordOffset / 8 * i);
+                            fieldOffset = m_writer.StringTable[array[i]] + recordOffset - (columnMeta.RecordOffset / 8 * (i+1));
                             record.Value.Write(fieldOffset, bitSize, columnMeta.RecordOffset + (i * bitSize));
                         }
                     }
@@ -166,6 +165,7 @@ namespace DBFileReaderLib.Writers
 
         private static Dictionary<Type, Action<int, BitWriter, BaseWriter<T>, FieldMetaData, ColumnMetaData, OrderedHashSet<Value32[]>, Dictionary<int, Value32>, object>> simpleWriters = new Dictionary<Type, Action<int, BitWriter, BaseWriter<T>, FieldMetaData, ColumnMetaData, OrderedHashSet<Value32[]>, Dictionary<int, Value32>, object>>
         {
+            [typeof(ulong)] = (id, data, writer, fieldMeta, columnMeta, palletData, commonData, value) => WriteFieldValue<ulong>(id, data, fieldMeta, columnMeta, palletData, commonData, value),
             [typeof(long)] = (id, data, writer, fieldMeta, columnMeta, palletData, commonData, value) => WriteFieldValue<long>(id, data, fieldMeta, columnMeta, palletData, commonData, value),
             [typeof(float)] = (id, data, writer, fieldMeta, columnMeta, palletData, commonData, value) => WriteFieldValue<float>(id, data, fieldMeta, columnMeta, palletData, commonData, value),
             [typeof(int)] = (id, data, writer, fieldMeta, columnMeta, palletData, commonData, value) => WriteFieldValue<int>(id, data, fieldMeta, columnMeta, palletData, commonData, value),
