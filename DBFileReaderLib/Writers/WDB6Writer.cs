@@ -177,12 +177,12 @@ namespace DBFileReaderLib.Writers
                 writer.Write(Meta.Length); // totalFieldCount
                 writer.Write(0); // commonDataSize
 
-                if (storage.Count == 0)
-                    return;
-
                 // field meta
                 for (int i = 0; i < FieldsCount; i++)
                     writer.Write(Meta[i]);
+
+                if (storage.Count == 0)
+                    return;
 
                 // record data
                 uint recordsOffset = (uint)writer.BaseStream.Position;

@@ -244,11 +244,11 @@ namespace DBFileReaderLib.Readers
                 int palletDataSize      = reader.ReadInt32();   // in bytes, sizeof(DBC2PalletValue) == 4
                 int referenceDataSize   = reader.ReadInt32();   // uint NumRecords, uint minId, uint maxId, {uint id, uint index}[NumRecords], questionable usefulness...
 
-                if (RecordsCount == 0)
-                    return;
-
                 // field meta data
                 Meta = reader.ReadArray<FieldMetaData>(FieldsCount);
+
+                if (RecordsCount == 0)
+                    return;
 
                 if (!Flags.HasFlagExt(DB2Flags.Sparse))
                 {

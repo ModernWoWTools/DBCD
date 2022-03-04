@@ -187,11 +187,11 @@ namespace DBFileReaderLib.Readers
                 Flags = (DB2Flags)reader.ReadUInt16();
                 IdFieldIndex = reader.ReadUInt16();
 
-                if (RecordsCount == 0)
-                    return;
-
                 // field meta data
                 Meta = reader.ReadArray<FieldMetaData>(FieldsCount);
+
+                if (RecordsCount == 0)
+                    return;
 
                 if (!Flags.HasFlagExt(DB2Flags.Sparse))
                 {

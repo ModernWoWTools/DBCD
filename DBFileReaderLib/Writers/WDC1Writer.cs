@@ -262,11 +262,11 @@ namespace DBFileReaderLib.Writers
                 writer.Write(palletDataSize);
                 writer.Write(referenceDataSize);
 
-                if (storage.Count == 0)
-                    return;
-
                 // field meta
                 writer.WriteArray(Meta);
+
+                if (storage.Count == 0)
+                    return;
 
                 // record data
                 uint recordsOffset = (uint)writer.BaseStream.Position;

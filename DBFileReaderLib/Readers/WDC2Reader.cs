@@ -289,10 +289,7 @@ namespace DBFileReaderLib.Readers
                 if (sectionsCount > 1)
                     throw new Exception("WDC2 only supports 1 section");
 
-                if (sectionsCount == 0 || RecordsCount == 0)
-                    return;
-
-                var sections = reader.ReadArray<SectionHeader>(sectionsCount).ToList();
+                var sections = (sectionsCount == 0) ? new List<SectionHeader>() : reader.ReadArray<SectionHeader>(sectionsCount).ToList();
                 m_sections = sections.OfType<IEncryptableDatabaseSection>().ToList();
 
                 // field meta data

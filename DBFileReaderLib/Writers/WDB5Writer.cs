@@ -165,11 +165,11 @@ namespace DBFileReaderLib.Writers
                 writer.Write((uint)Flags);
                 writer.Write((ushort)IdFieldIndex);
 
-                if (storage.Count == 0)
-                    return;
-
                 // field meta
                 writer.WriteArray(Meta);
+
+                if (storage.Count == 0)
+                    return;
 
                 // record data
                 uint recordsOffset = (uint)writer.BaseStream.Position;

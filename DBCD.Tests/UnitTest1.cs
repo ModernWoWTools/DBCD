@@ -1,56 +1,50 @@
-﻿using System.IO;
-using DBCD.Providers;
-using DBFileReaderLib;
+﻿using DBCD.Providers;
+using DBCD.Tests.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace DBCD.Tests
 {
     [TestClass]
     public class UnitTest1
     {
-        static GithubDBDProvider githubDBDProvider = new GithubDBDProvider();
-        static TestDBCProvider dbcProvider = new TestDBCProvider(Directory.GetCurrentDirectory());
+        public static CacheDBDProvider DBDProvider { get; } =  new CacheDBDProvider();
+        public static string InputPath { get; } = $"{Directory.GetCurrentDirectory()}\\dbc";
+        public static DBCD InputDBCD { get; } = new DBCD(new LocalDBCProvider(InputPath), DBDProvider);
+        public static DBCD SavedDBCD { get; } = new DBCD(new LocalDBCProvider("tmp"), DBDProvider);
 
-        // [TestMethod]
-        // public void TestMethod1()
-        // {
-        //     DBCD dbcd = new DBCD(dbcProvider, githubDBDProvider);
-        //     IDBCDStorage storage = dbcd.Load("ItemEffect");
-
-        //     var i1 = storage[116161];
-        //     var i2 = storage[116162];
-        // }
+        public static string Build { get; } = "9.1.0.39653";
 
         [TestMethod]
-        public void TestHotfixApplying()
+        public void TestWritingAllDB2s()
         {
-            DBCD dbcd = new DBCD(dbcProvider, githubDBDProvider);
+            string[] allDB2s = Directory.GetFiles(InputPath, "*.db2", SearchOption.TopDirectoryOnly);
 
-            var storage = dbcd.Load("ItemSparse");
-            var hotfix = new HotfixReader("hotfix.bin");
+            if(Directory.Exists("tmp"))
+                Directory.Delete("tmp", true);
+            Directory.CreateDirectory("tmp");
 
-            var countBefore = storage.Count;
-            storage.ApplyingHotfixes(hotfix);
-
-            var countAfter = storage.Count;
-
-            System.Console.WriteLine($"B: {countBefore} => A: {countAfter}");
-        }
-
-        [TestMethod]
-        public void TestEncryptedInfo()
-        {
-            var githubDBDProvider = new GithubDBDProvider();
-            var dbcProvider = new TestDBCProvider(Directory.GetCurrentDirectory());
-
-            DBCD dbcd = new DBCD(dbcProvider, githubDBDProvider);
-
-            var storage = dbcd.Load("SpellName");
-
-            foreach (var section in storage.GetEncryptedSections())
+            foreach(var db2File in allDB2s)
             {
-                System.Console.WriteLine($"Found encrypted secttion encrypted with key {section.Key} containing {section.Value} rows");
+                if (IO.TryGetExactPath(db2File, out string exactPath))
+                {
+                    var tableName = Path.GetFileNameWithoutExtension(exactPath);
+
+                    var originalStorage = InputDBCD.Load(tableName, Build);
+                    originalStorage.Save($"tmp/{tableName}.db2");
+
+                    var savedStorage = SavedDBCD.Load(tableName, Build);
+
+                    // Lazy compare
+                    var originalJson = JsonConvert.SerializeObject(originalStorage.Values);
+                    var newJson = JsonConvert.SerializeObject(savedStorage.Values);
+                    if (originalJson != newJson)
+                        throw new InvalidDataException($"The saved storage should not differ from the original one!");
+                }
             }
+
+            Directory.Delete("tmp", true);
         }
     }
 }

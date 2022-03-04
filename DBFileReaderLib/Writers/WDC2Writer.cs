@@ -143,7 +143,7 @@ namespace DBFileReaderLib.Writers
                         var array = (string[])info.Getter(rows[record.Key]);
                         for (int i = 0; i < array.Length; i++)
                         {
-                            fieldOffset = m_writer.StringTable[array[i]] + recordOffset - (columnMeta.RecordOffset / 8 * (i+1));
+                            fieldOffset = m_writer.StringTable[array[i]] + (recordOffset) - (sizeof(int) * i) - (columnMeta.RecordOffset / 8);
                             record.Value.Write(fieldOffset, bitSize, columnMeta.RecordOffset + (i * bitSize));
                         }
                     }

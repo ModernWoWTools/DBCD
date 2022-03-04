@@ -263,10 +263,7 @@ namespace DBFileReaderLib.Readers
                 int palletDataSize      = reader.ReadInt32();   // in bytes, sizeof(DBC2PalletValue) == 4
                 int sectionsCount       = reader.ReadInt32();
 
-                if (sectionsCount == 0 || RecordsCount == 0)
-                    return;
-
-                var sections = reader.ReadArray<SectionHeaderWDC3>(sectionsCount).ToList();
+                var sections = (sectionsCount == 0) ? new List<SectionHeaderWDC3>() : reader.ReadArray<SectionHeaderWDC3>(sectionsCount).ToList();
                 m_sections = sections.OfType<IEncryptableDatabaseSection>().ToList();
 
                 // field meta data
