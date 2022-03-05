@@ -192,7 +192,6 @@ namespace DBFileReaderLib.Writers
                                 };
 
                                 newCompressedSize = maxValue.MostSignificantBit();
-                                Console.WriteLine($"{info.Field.Name} {info.FieldType} | {compressionType} | {compressionSize} vs {newCompressedSize} -> {maxValue}");
                             }
                             break;
                         }
