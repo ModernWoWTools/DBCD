@@ -160,19 +160,38 @@ namespace DBFileReaderLib.Writers
                 switch (compressionType)
                 {
                     case CompressionType.SignedImmediate:
-                    case CompressionType.Immediate:
                         {
                             var maxValue = storage.Values.Count switch
                             {
-                                0 => 0U,
+                                0 => 0,
                                 _ => storage.Values.AsParallel().Max(row =>
                                 {
                                     var value32 = Value32.Create(info.Getter(row));
-                                    return value32.GetValue<uint>();
+                                    return value32.GetValue<int>();
                                 }),
                             };
 
-                            newCompressedSize = compressionType == CompressionType.SignedImmediate ? maxValue.MostSignificantBit() + 1 : maxValue.MostSignificantBit();
+                            newCompressedSize = maxValue.MostSignificantBit() + 1;
+                            break;
+                        }
+                    case CompressionType.Immediate:
+                        {
+                            if(info.FieldType == typeof(float))
+                                newCompressedSize = 32;
+                            else
+                            {
+                                var maxValue = storage.Values.Count switch
+                                {
+                                    0 => 0U,
+                                    _ => storage.Values.AsParallel().Max(row =>
+                                    {
+                                        var value32 = Value32.Create(info.Getter(row));
+                                        return value32.GetValue<uint>();
+                                    }),
+                                };
+
+                                newCompressedSize = maxValue.MostSignificantBit();
+                            }
                             break;
                         }
                     case CompressionType.Pallet:
