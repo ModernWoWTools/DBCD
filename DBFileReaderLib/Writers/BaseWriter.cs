@@ -3,6 +3,7 @@ using DBFileReaderLib.Readers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -161,17 +162,17 @@ namespace DBFileReaderLib.Writers
                 {
                     case CompressionType.SignedImmediate:
                         {
-                            var maxValue = storage.Values.Count switch
+                            var largestMSB = storage.Values.Count switch
                             {
                                 0 => 0,
                                 _ => storage.Values.AsParallel().Max(row =>
                                 {
                                     var value32 = Value32.Create(info.Getter(row));
-                                    return value32.GetValue<int>();
+                                    return value32.GetValue<int>().MostSignificantBit();
                                 }),
                             };
 
-                            newCompressedSize = maxValue.MostSignificantBit() + 1;
+                            newCompressedSize = largestMSB + 1;
                             break;
                         }
                     case CompressionType.Immediate:
@@ -191,6 +192,7 @@ namespace DBFileReaderLib.Writers
                                 };
 
                                 newCompressedSize = maxValue.MostSignificantBit();
+                                Console.WriteLine($"{info.Field.Name} {info.FieldType} | {compressionType} | {compressionSize} vs {newCompressedSize} -> {maxValue}");
                             }
                             break;
                         }
