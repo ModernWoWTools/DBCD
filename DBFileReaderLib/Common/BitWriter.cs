@@ -17,6 +17,7 @@ namespace DBFileReaderLib.Common
 
         public byte this[int i] => buffer[i];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteAligned<T>(T value) where T : struct
         {
             EnsureSize();
@@ -24,7 +25,7 @@ namespace DBFileReaderLib.Common
             TotalBytesWrittenOut += Unsafe.SizeOf<T>();
         }
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteCStringAligned(string value)
         {
             byte[] data = Encoding.UTF8.GetBytes(value);
@@ -36,6 +37,7 @@ namespace DBFileReaderLib.Common
             TotalBytesWrittenOut += data.Length;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write<T>(T value, int nbits) where T : struct
         {
             Span<byte> pool = stackalloc byte[0x10];
@@ -56,6 +58,7 @@ namespace DBFileReaderLib.Common
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write<T>(T value, int nbits, int offset) where T : struct
         {
             Span<byte> pool = stackalloc byte[0x10];
@@ -87,6 +90,7 @@ namespace DBFileReaderLib.Common
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteCString(string value)
         {
             // Note: cstrings are always aligned to 8 bytes
@@ -104,7 +108,7 @@ namespace DBFileReaderLib.Common
             }
         }
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WriteBits(int bitCount, uint value)
         {
             EnsureSize();
@@ -122,6 +126,7 @@ namespace DBFileReaderLib.Common
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureSize(int size = 8)
         {
             if (TotalBytesWrittenOut + size >= buffer.Length)
@@ -135,7 +140,6 @@ namespace DBFileReaderLib.Common
                 buffer = rent;
             }
         }
-
 
         public void Resize(int size)
         {

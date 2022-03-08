@@ -20,6 +20,7 @@ namespace DBFileReaderLib.Common
             m_readOffset = offset;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadUInt32(int numBits)
         {
             uint result = Unsafe.As<byte, uint>(ref m_array[m_readOffset + (Position >> 3)]) << (32 - numBits - (Position & 7)) >> (32 - numBits);
@@ -27,6 +28,7 @@ namespace DBFileReaderLib.Common
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadUInt64(int numBits)
         {
             ulong result = Unsafe.As<byte, ulong>(ref m_array[m_readOffset + (Position >> 3)]) << (64 - numBits - (Position & 7)) >> (64 - numBits);

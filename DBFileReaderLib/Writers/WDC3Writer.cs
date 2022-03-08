@@ -225,8 +225,7 @@ namespace DBFileReaderLib.Writers
                     }
                 case CompressionType.Pallet:
                     {
-                        Value32[] array = new[] { Value32.Create((TType)value) };
-
+                        Value32[] array = new[] { Value32.Create(value) };
                         int palletIndex = palletData.IndexOf(array);
                         if (palletIndex == -1)
                         {
@@ -260,7 +259,7 @@ namespace DBFileReaderLib.Writers
                         // get data
                         Value32[] array = new Value32[value.Length];
                         for (int i = 0; i < value.Length; i++)
-                            array[i] = Value32.Create((TType)value.GetValue(i));
+                            array[i] = Value32.Create(value.GetValue(i));
 
                         int palletIndex = palletData.IndexOf(array);
                         if (palletIndex == -1)

@@ -68,6 +68,7 @@ namespace DBFileReaderLib.Common
     {
         unsafe fixed byte Value[4];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetValue<T>() where T : struct
         {
             unsafe
@@ -77,11 +78,13 @@ namespace DBFileReaderLib.Common
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Value32 Create<T>(T obj) where T : unmanaged
         {
             return *(Value32*)&obj;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Value32 Create(object obj)
         {
             if (obj is byte b)
@@ -111,6 +114,7 @@ namespace DBFileReaderLib.Common
     {
         unsafe fixed byte Value[8];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetValue<T>() where T : struct
         {
             unsafe
