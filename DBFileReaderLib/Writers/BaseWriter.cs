@@ -13,6 +13,8 @@ namespace DBFileReaderLib.Writers
 {
     abstract class BaseWriter<T> where T : class
     {
+        private static readonly Value32Comparer Value32Comparer = new Value32Comparer();
+
         public FieldCache<T>[] FieldCache { get; protected set; }
         public int RecordsCount { get; protected set; }
         public int StringTableSize { get; set; }
@@ -55,7 +57,7 @@ namespace DBFileReaderLib.Writers
                 for (int i = 0; i < ColumnMeta.Length; i++)
                 {
                     CommonData[i] = new Dictionary<int, Value32>();
-                    PalletData[i] = new OrderedHashSet<Value32[]>(new Value32Comparer());
+                    PalletData[i] = new OrderedHashSet<Value32[]>(Value32Comparer);
                 }
             }
 

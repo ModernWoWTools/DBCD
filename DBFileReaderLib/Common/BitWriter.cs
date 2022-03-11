@@ -8,20 +8,22 @@ namespace DBFileReaderLib.Common
 {
     class BitWriter : IEquatable<BitWriter>, IDisposable
     {
+        private static readonly ArrayPool<byte> SharedPool = ArrayPool<byte>.Create();
+
         public int TotalBytesWrittenOut { get; private set; }
 
-        private byte nAccumulatedBits;
-        private byte[] buffer;
+        private byte AccumulatedBitsCount;
+        private byte[] Buffer;
 
-        public BitWriter(int capacity) => buffer = ArrayPool<byte>.Shared.Rent(capacity);
+        public BitWriter(int capacity) => Buffer = SharedPool.Rent(capacity);
 
-        public byte this[int i] => buffer[i];
+        public byte this[int i] => Buffer[i];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteAligned<T>(T value) where T : struct
         {
             EnsureSize();
-            Unsafe.WriteUnaligned(ref buffer[TotalBytesWrittenOut], value);
+            Unsafe.WriteUnaligned(ref Buffer[TotalBytesWrittenOut], value);
             TotalBytesWrittenOut += Unsafe.SizeOf<T>();
         }
 
@@ -32,7 +34,7 @@ namespace DBFileReaderLib.Common
             Array.Resize(ref data, data.Length + 1);
 
             EnsureSize(data.Length);
-            Unsafe.CopyBlockUnaligned(ref buffer[TotalBytesWrittenOut], ref data[0], (uint)data.Length);
+            Unsafe.CopyBlockUnaligned(ref Buffer[TotalBytesWrittenOut], ref data[0], (uint)data.Length);
 
             TotalBytesWrittenOut += data.Length;
         }
@@ -41,10 +43,10 @@ namespace DBFileReaderLib.Common
         public void Write<T>(T value, int nbits) where T : struct
         {
             Span<byte> pool = stackalloc byte[0x10];
-            if (nAccumulatedBits == 0 && (nbits & 7) == 0)
+            if (AccumulatedBitsCount == 0 && (nbits & 7) == 0)
             {
                 EnsureSize();
-                Unsafe.WriteUnaligned(ref buffer[TotalBytesWrittenOut], value);
+                Unsafe.WriteUnaligned(ref Buffer[TotalBytesWrittenOut], value);
                 TotalBytesWrittenOut += nbits / 8;
             }
             else
@@ -72,11 +74,11 @@ namespace DBFileReaderLib.Common
             while ((nbits -= 8) >= 0)
             {
                 // write last part of this byte
-                buffer[byteOffset] = (byte)((buffer[byteOffset] & (0xFF >> highLen)) | (pool[i] << lowLen));
+                Buffer[byteOffset] = (byte)((Buffer[byteOffset] & (0xFF >> highLen)) | (pool[i] << lowLen));
 
                 // write first part of next byte
                 byteOffset++;
-                buffer[byteOffset] = (byte)((buffer[byteOffset] & (0xFF << lowLen)) | (pool[i] >> highLen));
+                Buffer[byteOffset] = (byte)((Buffer[byteOffset] & (0xFF << lowLen)) | (pool[i] >> highLen));
                 i++;
             }
 
@@ -86,7 +88,7 @@ namespace DBFileReaderLib.Common
                 lowLen = nbits;
                 highLen = 8 - nbits;
 
-                buffer[byteOffset] = (byte)((buffer[byteOffset] & (0xFF >> highLen)) | (pool[i] << lowLen));
+                Buffer[byteOffset] = (byte)((Buffer[byteOffset] & (0xFF >> highLen)) | (pool[i] << lowLen));
             }
         }
 
@@ -94,7 +96,7 @@ namespace DBFileReaderLib.Common
         public void WriteCString(string value)
         {
             // Note: cstrings are always aligned to 8 bytes
-            if (nAccumulatedBits == 0)
+            if (AccumulatedBitsCount == 0)
             {
                 WriteCStringAligned(value);
             }
@@ -115,13 +117,13 @@ namespace DBFileReaderLib.Common
 
             for (int i = 0; i < bitCount; i++)
             {
-                buffer[TotalBytesWrittenOut] |= (byte)(((value >> i) & 0x1) << nAccumulatedBits);
-                nAccumulatedBits++;
+                Buffer[TotalBytesWrittenOut] |= (byte)(((value >> i) & 0x1) << AccumulatedBitsCount);
+                AccumulatedBitsCount++;
 
-                if (nAccumulatedBits > 7)
+                if (AccumulatedBitsCount > 7)
                 {
                     TotalBytesWrittenOut++;
-                    nAccumulatedBits = 0;
+                    AccumulatedBitsCount = 0;
                 }
             }
         }
@@ -129,15 +131,15 @@ namespace DBFileReaderLib.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureSize(int size = 8)
         {
-            if (TotalBytesWrittenOut + size >= buffer.Length)
+            if (TotalBytesWrittenOut + size >= Buffer.Length)
             {
-                byte[] rent = ArrayPool<byte>.Shared.Rent(buffer.Length + size);
+                byte[] rent = SharedPool.Rent(Buffer.Length + size);
 
-                Unsafe.CopyBlock(ref rent[0], ref buffer[0], (uint)rent.Length);
+                Unsafe.CopyBlock(ref rent[0], ref Buffer[0], (uint)rent.Length);
 
-                ArrayPool<byte>.Shared.Return(buffer, true);
+                SharedPool.Return(Buffer, true);
 
-                buffer = rent;
+                Buffer = rent;
             }
         }
 
@@ -162,7 +164,7 @@ namespace DBFileReaderLib.Common
 
         public void CopyTo(Stream stream)
         {
-            stream.Write(buffer, 0, TotalBytesWrittenOut);
+            stream.Write(Buffer, 0, TotalBytesWrittenOut);
         }
 
         public bool Equals(BitWriter other)
@@ -187,7 +189,7 @@ namespace DBFileReaderLib.Common
                 int hash = (int)2166136261;
 
                 for (int i = 0; i < TotalBytesWrittenOut; i++)
-                    hash = (hash ^ buffer[i]) * p;
+                    hash = (hash ^ Buffer[i]) * p;
 
                 hash += hash << 13;
                 hash ^= hash >> 7;
@@ -198,6 +200,6 @@ namespace DBFileReaderLib.Common
             }
         }
 
-        public void Dispose() => ArrayPool<byte>.Shared.Return(buffer);
+        public void Dispose() => SharedPool.Return(Buffer);
     }
 }

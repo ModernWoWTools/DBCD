@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBFileReaderLib", "DBFileRe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBCD.Tests", "DBCD.Tests\DBCD.Tests.csproj", "{96CFC512-3818-487F-8FB6-7632E340ABB9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBCD.Benchmark", "DBCD.Benchmark\DBCD.Benchmark.csproj", "{A49C1C91-D14F-4943-8B9F-269C13B774A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,10 +29,10 @@ Global
 		{96CFC512-3818-487F-8FB6-7632E340ABB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96CFC512-3818-487F-8FB6-7632E340ABB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96CFC512-3818-487F-8FB6-7632E340ABB9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B35C93E5-9C8F-4AF2-8B4B-DDCB7AE52F89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B35C93E5-9C8F-4AF2-8B4B-DDCB7AE52F89}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B35C93E5-9C8F-4AF2-8B4B-DDCB7AE52F89}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B35C93E5-9C8F-4AF2-8B4B-DDCB7AE52F89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A49C1C91-D14F-4943-8B9F-269C13B774A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A49C1C91-D14F-4943-8B9F-269C13B774A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A49C1C91-D14F-4943-8B9F-269C13B774A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A49C1C91-D14F-4943-8B9F-269C13B774A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

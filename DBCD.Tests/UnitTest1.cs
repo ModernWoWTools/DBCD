@@ -40,7 +40,12 @@ namespace DBCD.Tests
                     var originalJson = JsonConvert.SerializeObject(originalStorage.Values);
                     var newJson = JsonConvert.SerializeObject(savedStorage.Values);
                     if (originalJson != newJson)
-                        throw new InvalidDataException($"The saved storage should not differ from the original one!");
+                    {
+                        File.WriteAllText("original.json", originalJson);
+                        File.WriteAllText("new.json", newJson);
+
+                        throw new InvalidDataException($"The saved storage {tableName} should not differ from the original one!");
+                    }
                 }
             }
 
