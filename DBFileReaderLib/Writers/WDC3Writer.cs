@@ -18,8 +18,6 @@ namespace DBFileReaderLib.Writers
         private readonly OrderedHashSet<Value32[]>[] m_palletData;
         private readonly Dictionary<int, Value32>[] m_commonData;
 
-        private static readonly Value32Comparer Value32Comparer = new Value32Comparer();
-
         public WDC3RowSerializer(BaseWriter<T> writer)
         {
             m_writer = writer;
@@ -310,7 +308,7 @@ namespace DBFileReaderLib.Writers
                 writer.Write(RecordsCount);
                 writer.Write(FieldsCount);
                 writer.Write(RecordSize);
-                writer.Write(StringTableSize);
+                writer.Write(storage.Count != 0 ? StringTableSize : 0);
                 writer.Write(reader.TableHash);
                 writer.Write(reader.LayoutHash);
                 writer.Write(minIndex);
@@ -319,16 +317,20 @@ namespace DBFileReaderLib.Writers
                 writer.Write((ushort)Flags);
                 writer.Write((ushort)IdFieldIndex);
 
-                writer.Write(FieldsCount);                      // totalFieldCount
-                writer.Write(PackedDataOffset);
-                writer.Write(ReferenceData.Count > 0 ? 1 : 0);  // RelationshipColumnCount
-                writer.Write(ColumnMeta.Length * 24);           // ColumnMetaDataSize
-                writer.Write(commonDataSize);
-                writer.Write(palletDataSize);
-                writer.Write(1);                                // sections count
+                writer.Write(FieldsCount);                                                  // totalFieldCount
+                writer.Write(storage.Count != 0 ? PackedDataOffset : 0);
+                writer.Write(storage.Count != 0 ? (ReferenceData.Count > 0 ? 1 : 0) : 0);   // RelationshipColumnCount
+                writer.Write(storage.Count != 0 ? ColumnMeta.Length * 24 : 0);              // ColumnMetaDataSize
+                writer.Write(storage.Count != 0 ? commonDataSize : 0);
+                writer.Write(storage.Count != 0 ? palletDataSize : 0);
+                writer.Write(storage.Count != 0 ? 1 : 0);                                   // sections count
 
                 if (storage.Count == 0)
+                {
+                    // only need to write field structure if empty
+                    writer.WriteArray(Meta);
                     return;
+                }
 
                 // section header
                 int fileOffset = HeaderSize + (Meta.Length * 4) + (ColumnMeta.Length * 24) + Unsafe.SizeOf<SectionHeaderWDC3>() + palletDataSize + commonDataSize;

@@ -37,8 +37,8 @@ namespace DBCD.Tests
                     var savedStorage = SavedDBCD.Load(tableName, Build);
 
                     // Lazy compare
-                    var originalJson = JsonConvert.SerializeObject(originalStorage.Values);
-                    var newJson = JsonConvert.SerializeObject(savedStorage.Values);
+                    var originalJson = JsonConvert.SerializeObject(originalStorage.Values, Formatting.Indented);
+                    var newJson = JsonConvert.SerializeObject(savedStorage.Values, Formatting.Indented);
                     if (originalJson != newJson)
                     {
                         File.WriteAllText("original.json", originalJson);

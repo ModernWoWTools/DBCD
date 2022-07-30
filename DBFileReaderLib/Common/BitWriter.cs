@@ -135,7 +135,7 @@ namespace DBFileReaderLib.Common
             {
                 byte[] rent = SharedPool.Rent(Buffer.Length + size);
 
-                Unsafe.CopyBlock(ref rent[0], ref Buffer[0], (uint)rent.Length);
+                Unsafe.CopyBlockUnaligned(ref rent[0], ref Buffer[0], (uint)rent.Length);
 
                 SharedPool.Return(Buffer, true);
 
