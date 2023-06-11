@@ -139,6 +139,9 @@ namespace DBFileReaderLib
             BaseWriter<T> writer;
             switch (Identifier)
             {
+                case "WDC4":
+                    writer = new WDC4Writer<T>((WDC4Reader)_reader, storage, stream);
+                    break;
                 case "WDC3":
                     writer = new WDC3Writer<T>((WDC3Reader)_reader, storage, stream);
                     break;
