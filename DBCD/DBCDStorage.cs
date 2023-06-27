@@ -112,7 +112,10 @@ namespace DBCD
         void ApplyingHotfixes(HotfixReader hotfixReader, HotfixReader.RowProcessor processor);
 
         Dictionary<ulong, int> GetEncryptedSections();
+
         void Save(string filename);
+
+        Dictionary<int, DBCDRow> ToDictionary();
     }
 
     public class DBCDStorage<T> : Dictionary<int, DBCDRow>, IDBCDStorage where T : class, new()
@@ -178,5 +181,10 @@ namespace DBCD
         }
 
         public DBCDRow ConstructRow(int index) => new DBCDRow(index, new T(), fieldAccessor);
+
+        public Dictionary<int, DBCDRow> ToDictionary()
+        {
+            return this;
+        }
     }
 }
