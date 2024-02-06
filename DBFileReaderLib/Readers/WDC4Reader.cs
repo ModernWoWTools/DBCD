@@ -288,7 +288,7 @@ namespace DBFileReaderLib.Readers
 
                 var sections = reader.ReadArray<SectionHeaderWDC4>(sectionsCount);
                 this.m_sections = sections.OfType<IEncryptableDatabaseSection>().ToList();
-                this.m_encryptedIDs = new Dictionary<int, int[]>();
+                this.m_encryptedIDs = new Dictionary<ulong, int[]>();
 
                 // field meta data
                 Meta = reader.ReadArray<FieldMetaData>(FieldsCount);
