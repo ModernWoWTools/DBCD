@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace DBFileReaderLib.Writers
 {
@@ -308,7 +309,7 @@ namespace DBFileReaderLib.Writers
 
                 writer.Write(WDC5FmtSig);
                 writer.Write((uint)5); // numaric version
-                writer.Write(staticVersionString.PadRight(128, '\0').ToByteArray());
+                writer.Write(Encoding.ASCII.GetBytes(staticVersionString.PadRight(128, '\0')));
 
                 writer.Write(RecordsCount);
                 writer.Write(FieldsCount);
